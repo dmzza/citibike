@@ -38,7 +38,7 @@ $(function() {
 		  		minDifference = difference;
 		  	}
 		  }
-		  output = "<li>Your closest station is " + closestStation.label + " with " + closestStation.availableBikes + " bikes available. </li><li> Your best shot of a station with working docks and bikes is at " + optimalStation.label + "</li>";
-		  $("ul").html(output);
+		  output = "<li>Your closest station is " + closestStation.label + " with " + closestStation.availableBikes + " bikes available. </li><li> Your best shot of a station with working docks and bikes is at " + optimalStation.label + "</li><li><img src='http://maps.googleapis.com/maps/api/staticmap?center=" + lat + "," + lon + "&zoom=14&size=400x400&sensor=false&markers=color:blue%7Clabel:1%7C" + closestStation.latitude + "," + closestStation.longitude + "&markers=color:green%7Clabel:2%7C" + optimalStation.latitude + "," + optimalStation.longitude + "'></li>";
+		  $("ol").html(output);
 		});
 });

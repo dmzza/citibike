@@ -3,15 +3,16 @@
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript" src="/javascripts/stations.js"></script>
+    <script>
+    	var stations = <%- JSON.stringify(stations) %>;
+    </script>
   </head>
   <body>
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
-    You're near <%= closestStation.label %>, but your best chance of finding a bike or a place to dock is at <%= optimalStation.label %>
     <ul>
-    <% for(var i = 0; i < nearbyStations.length; i++) { %>
-    	<li><%= nearbyStations[i].label %>: <%= nearbyStations[i].availableBikes %> bikes and <%= nearbyStations[i].availableDocks %> docks</li>
-    <% } %>
   	</ul>
   </body>
 </html>

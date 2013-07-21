@@ -7,7 +7,7 @@
   <body>
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
-    You're near <%= closestStation.label %>
+    You're near <%= closestStation.label %>, but your best chance of finding a bike or a place to dock is at <%= optimalStation.label %>
     <ul>
     <% for(var i = 0; i < nearbyStations.length; i++) { %>
     	<li><%= nearbyStations[i].label %>: <%= nearbyStations[i].availableBikes %> bikes and <%= nearbyStations[i].availableDocks %> docks</li>

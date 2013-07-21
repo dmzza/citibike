@@ -13,6 +13,8 @@ exports.index = function(req, res){
 	citibike.getStations(null, function(data) {
 	  stations = data["results"];
 	  closestStation = null;
+	  nearbyStations = new Array();
+	  nearbyStationIds = new Array();
 	  minDistance = 10000;
 
 	  for(var i = 0; i < stations.length; i++) {
@@ -23,8 +25,19 @@ exports.index = function(req, res){
 	  	}
 	  }
 
+	  for(var i = 0; i < closestStation.nearbyStations.length; i++) {
+	  	nearbyStationIds.push(closestStation.nearbyStations[i].id);
+	  }
 
-	  res.render('index', { title: 'CitiBike', stations: stations, closestStation: closestStation });
+	  for(var i = 0; i < stations.length; i++) {
+	  	if(nearbyStationIds.indexOf(stations[i].id) >= 0) {
+	  		nearbyStations.push(stations[i])
+	  	}
+	  }
+
+
+
+	  res.render('index', { title: 'CitiBike', stations: stations, closestStation: closestStation, nearbyStations: nearbyStations });
 	});
   //res.render('index', { title: 'CitiBike', stations: stations });
 

@@ -29,6 +29,7 @@ exports.index = function(req, res){
 	  	nearbyStationIds.push(closestStation.nearbyStations[i].id);
 	  }
 
+	  nearbyStations.push(closestStation);
 	  for(var i = 0; i < stations.length; i++) {
 	  	if(nearbyStationIds.indexOf(stations[i].id) >= 0) {
 	  		nearbyStations.push(stations[i])

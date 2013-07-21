@@ -8,12 +8,9 @@
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
     You're near <%= closestStation.label %>
-    <% for(var i = 0; i < nearbyStations.length; i++) { %>
-    	and <%= nearbyStations[i].label %>
-    <% } %>
     <ul>
-    <% for(var i = 0; i < stations.length; i++) { %>
-    	<li><%= stations[i].label %></li>
+    <% for(var i = 0; i < nearbyStations.length; i++) { %>
+    	<li><%= nearbyStations[i].label %>: <%= nearbyStations[i].availableBikes %> bikes and <%= nearbyStations[i].availableDocks %> docks</li>
     <% } %>
   	</ul>
   </body>

@@ -8,7 +8,8 @@ var express = require('express')
   , user = require('./routes/user')
   , http = require('http')
   , path = require('path')
-  , citibike = require('citibike');
+  , citibike = require('citibike')
+  , mongo = require('mongodb');
 
 var app = express();
 

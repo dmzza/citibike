@@ -18,6 +18,7 @@ var mongoUri = process.env.MONGOLAB_URI ||
 exports.index = function(req, res){
 	citibike.getStations({updateOnly: "true"}, function(data) {
 	  stations = data["results"];
+	  timestamp = data["lastUpdate"]
 
 		mongo.Db.connect(mongoUri, function (err, db) {
 			if (err) throw err;
@@ -28,6 +29,7 @@ exports.index = function(req, res){
 			db.collection('stations', function(er, collection) {
 				for(i=0; i<stations.length; i++) {
 					station = stations[i];
+					station["lastUpdate"] = timestamp;
 					// delete station["nearbyStations"];
 					// delete station[""]
 					collection.insert(station, {safe: true}, function(error,response) {

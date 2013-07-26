@@ -11,7 +11,8 @@ var mongoUri = process.env.MONGOLAB_URI ||
 
 exports.list = function(req, res){
 	var longitude = parseFloat(req.query.lon)
-		, latitude = parseFloat(req.query.lat);
+		, latitude = parseFloat(req.query.lat)
+		, output = new Array();
 
 	mongo.Db.connect(mongoUri, function (err, db) {
 		if (err) throw err;
@@ -28,8 +29,14 @@ exports.list = function(req, res){
 					}, '$maxDistance': 500 }
 				}
 			}
-		).toArray(function(err, nearbyStations) {
-			res.json(nearbyStations);
+		).each(function(err, station) {
+			// If the item is null then the cursor is exhausted/empty and closed
+			if(station == null) {
+				db.close();
+				res.json(output);
+			} else {
+				output.push(station);
+			}
 		})
 
 	});

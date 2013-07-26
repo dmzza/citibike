@@ -30,13 +30,16 @@ exports.index = function(req, res){
 				for(i=0; i<stations.length; i++) {
 					station = stations[i];
 					station["lastUpdate"] = timestamp;
+					station["loc"] = { type: "Point", coordinates: [ station["longitude"], station["latitude"] ]};
+					delete station["longitude"];
+					delete station["latitude"];
 					delete station["nearbyStations"];
 					delete station["availableBikes"];
 					delete station["availableDocks"];
 					delete station["status"];
 					delete station["stationAddress"];
-					collection.insert(station, {safe: true}, function(error,response) {
-
+					collection.insert(station, {safe: true}, function(err,response) {
+						if(err) throw err;
 					});
 				}
 			});

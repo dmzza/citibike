@@ -16,7 +16,7 @@ var mongoUri = process.env.MONGOLAB_URI ||
 		'mongodb://localhost/citibike';
 
 exports.index = function(req, res){
-	citibike.getStations({updateOnly: "true"}, function(data) {
+	citibike.getStations(null, function(data) {
 	  stations = data["results"];
 	  timestamp = data["lastUpdate"]
 
@@ -30,8 +30,11 @@ exports.index = function(req, res){
 				for(i=0; i<stations.length; i++) {
 					station = stations[i];
 					station["lastUpdate"] = timestamp;
-					// delete station["nearbyStations"];
-					// delete station[""]
+					delete station["nearbyStations"];
+					delete station["availableBikes"];
+					delete station["availableDocks"];
+					delete station["status"];
+					delete station["stationAddress"];
 					collection.insert(station, {safe: true}, function(error,response) {
 
 					});

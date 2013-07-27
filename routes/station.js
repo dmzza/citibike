@@ -12,7 +12,8 @@ var mongoUri = process.env.MONGOLAB_URI ||
 exports.list = function(req, res){
 	var longitude = parseFloat(req.query.lon)
 		, latitude = parseFloat(req.query.lat)
-		, output = new Array();
+		, output = new Array()
+		, timeSpan = new Date().getTime() - (2 * 60 * 60 * 1000); /* hours * minutes * seconds * milliseconds */
 
 	mongo.Db.connect(mongoUri, function (err, db) {
 		if (err) throw err;
@@ -35,6 +36,9 @@ exports.list = function(req, res){
 				db.close();
 				res.json(output);
 			} else {
+				updateCollection.find({id: station["id"], lastUpdated: {'$gt': timeSpan}}).sort({lastUpdated: 1}).each(function(err, update) {
+
+				})
 				output.push(station);
 			}
 		})

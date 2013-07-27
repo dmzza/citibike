@@ -13,7 +13,8 @@ exports.list = function(req, res){
 	var longitude = parseFloat(req.query.lon)
 		, latitude = parseFloat(req.query.lat)
 		, output = new Array()
-		, timeSpan = new Date().getTime() - (2 * 60 * 60 * 1000); /* hours * minutes * seconds * milliseconds */
+		, nearbyStations = new Array()
+		, timeSpan = new Date().getTime() / 1000 - (4 * 60 * 60); /* hours * minutes * seconds */
 
 	mongo.Db.connect(mongoUri, function (err, db) {
 		if (err) throw err;
@@ -21,7 +22,7 @@ exports.list = function(req, res){
 		var stationCollection = db.collection('stations')
 			, updateCollection = db.collection('updates');
 
-		stationCollection.find({
+		var stationCursor = stationCollection.find({
 			loc: {
 				'$near': {
 					'$geometry': {
@@ -30,16 +31,57 @@ exports.list = function(req, res){
 					}, '$maxDistance': 500 }
 				}
 			}
-		).each(function(err, station) {
+		);
+		var stationCount = 0;
+		stationCursor.count(function(err, count) {
+			stationCount = count;
+		});
+
+		stationCursor.each(function(err, station) {
 			// If the item is null then the cursor is exhausted/empty and closed
 			if(station == null) {
-				db.close();
-				res.json(output);
+				//db.close();
+				// res.json(output);
 			} else {
-				updateCollection.find({id: station["id"], lastUpdated: {'$gt': timeSpan}}).sort({lastUpdated: 1}).each(function(err, update) {
+				nearbyStations[station["id"]] = station;
+				updateCollection.aggregate( [ { '$match': { id: station["id"], lastUpdate: {$gt: timeSpan} } }, { '$group': { '_id': '$id', minBikes: { '$min': "$availableBikes"} } } ], function(err, minResult) {
+					if(err) throw err;
 
-				})
-				output.push(station);
+					minBikes = minResult[0].minBikes;
+					nearbyStations[minResult[0]._id].minBikes = minBikes;
+
+					updateCollection.findOne({$query: {id: station["id"]}, $orderby: {'lastUpdate': -1}}, function(err, latestUpdate) {
+						if(err) throw err;
+
+						thisId = latestUpdate["id"]
+						latestBikes = latestUpdate["availableBikes"]
+						latestDocks = latestUpdate["availableDocks"]
+						nearbyStations[thisId].availableBikes = latestBikes;
+
+						if(nearbyStations[thisId].minBikes < latestBikes) {
+							nearbyStations[thisId].bikeStatus = "OK"
+						} else {
+							nearbyStations[thisId].bikeStatus = "NO"
+						}
+						if(latestDocks > 1) {
+							nearbyStations[thisId].dockStatus = "OK"
+						} else {
+							nearbyStations[thisId].dockStatus = "NO"
+						}
+
+						output.push(nearbyStations[thisId]);
+
+						//console.log("id: " + latestUpdate["id"] + " minBikes: " + nearbyStations[thisId].minBikes + " latestBikes: " + latestBikes + " counts: " + stationCount + " === " + output.length);
+
+						if(output.length === stationCount)
+							res.json(output);
+					});
+				});
+
+				updateCollection.find({id: station["id"], lastUpdated: {'$gt': timeSpan}}).sort({lastUpdate: 1}).each(function(err, update) {
+
+				});
+
 			}
 		})
 

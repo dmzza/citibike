@@ -54,6 +54,7 @@ exports.list = function(req, res){
 						if(err) throw err;
 
 						thisId = latestUpdate["id"]
+						latestStatus = latestUpdate["status"]
 						latestBikes = latestUpdate["availableBikes"]
 						latestDocks = latestUpdate["availableDocks"]
 						totalDocks = latestBikes + latestDocks;
@@ -67,6 +68,10 @@ exports.list = function(req, res){
 						if(latestDocks > 1) {
 							nearbyStations[thisId].dockStatus = "OK"
 						} else {
+							nearbyStations[thisId].dockStatus = "NO"
+						}
+						if(latestStatus != "Active") {
+							nearbyStations[thisId].bikeStatus = "NO"
 							nearbyStations[thisId].dockStatus = "NO"
 						}
 

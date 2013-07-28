@@ -75,6 +75,10 @@ exports.list = function(req, res){
 							nearbyStations[thisId].dockStatus = "NO"
 						}
 
+						nearbyStations[thisId].longitude = nearbyStations[thisId].loc.coordinates[0];
+						nearbyStations[thisId].latitude = nearbyStations[thisId].loc.coordinates[1];
+						delete nearbyStations[thisId].loc;
+
 						output.push(nearbyStations[thisId]);
 
 						//console.log("id: " + latestUpdate["id"] + " minBikes: " + nearbyStations[thisId].minBikes + " latestBikes: " + latestBikes + " counts: " + stationCount + " === " + output.length);

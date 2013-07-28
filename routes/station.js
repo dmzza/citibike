@@ -56,9 +56,10 @@ exports.list = function(req, res){
 						thisId = latestUpdate["id"]
 						latestBikes = latestUpdate["availableBikes"]
 						latestDocks = latestUpdate["availableDocks"]
+						totalDocks = latestBikes + latestDocks;
 						nearbyStations[thisId].availableBikes = latestBikes;
 
-						if(nearbyStations[thisId].minBikes < latestBikes) {
+						if(nearbyStations[thisId].minBikes < latestBikes || (latestBikes / totalDocks) > 0.15) {
 							nearbyStations[thisId].bikeStatus = "OK"
 						} else {
 							nearbyStations[thisId].bikeStatus = "NO"

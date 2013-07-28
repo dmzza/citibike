@@ -35,7 +35,10 @@ exports.index = function(req, res){
 				allStations[station["id"]] = station;
 
 				stationCollection.findOne({"id": station["id"]}, function(err, stationRecord) {
+					try {
 					if (err) throw err;
+					if(stationRecord === null) throw "missing station";
+
 
 					var thisStation = allStations[stationRecord["id"]];
 
@@ -54,6 +57,9 @@ exports.index = function(req, res){
 							stationCollection.update({"id": stationRecord["id"]}, {$set: {"lastUpdate": timestamp}});
 						}
 					});
+					} catch(err) {
+						console.log(err);
+					}
 				});
 			}
 			setTimeout(function() {

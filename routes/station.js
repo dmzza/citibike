@@ -17,6 +17,7 @@ exports.list = function(req, res){
 		, timeSpan = new Date().getTime() / 1000 - (4 * 60 * 60); /* hours * minutes * seconds */
 
 	mongo.Db.connect(mongoUri, function (err, db) {
+		try {
 		if (err) throw err;
 
 		var stationCollection = db.collection('stations')
@@ -93,7 +94,10 @@ exports.list = function(req, res){
 				});
 
 			}
-		})
-
+		});
+		} catch(err) {
+			console.log(err);
+			res.send(500);
+		}
 	});
 };

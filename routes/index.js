@@ -23,6 +23,7 @@ exports.index = function(req, res){
 	  	, output = new Array();
 
 		mongo.Db.connect(mongoUri, function (err, db) {
+			try {
 			if (err) throw err;
 
 			var stationCollection = db.collection('stations')
@@ -58,6 +59,10 @@ exports.index = function(req, res){
 			setTimeout(function() {
 				res.render('index', { title: 'CitiBike', stations: output });
 			}, 2000);
+			} catch(err) {
+				console.log(err);
+				res.send(500);
+			}
 		});
 
 

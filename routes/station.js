@@ -13,6 +13,7 @@ exports.list = function(req, res){
 	var longitude = parseFloat(req.query.lon)
 		, latitude = parseFloat(req.query.lat)
 		, output = new Array()
+		, missingUpdates = 0
 		, nearbyStations = new Array()
 		, timeSpan = new Date().getTime() / 1000 - (4 * 60 * 60); /* hours * minutes * seconds */
 
@@ -46,7 +47,12 @@ exports.list = function(req, res){
 			} else {
 				nearbyStations[station["id"]] = station;
 				updateCollection.aggregate( [ { '$match': { id: station["id"], lastUpdate: {$gt: timeSpan} } }, { '$group': { '_id': '$id', minBikes: { '$min': "$availableBikes"} } } ], function(err, minResult) {
-					if(err) throw err;
+					try {
+					if (err) throw err;
+					if(typeof minResult[0] == "undefined") {
+						missingUpdates++;
+						throw "missing recent updates";
+					}
 
 					minBikes = minResult[0].minBikes;
 					nearbyStations[minResult[0]._id].minBikes = minBikes;
@@ -84,13 +90,12 @@ exports.list = function(req, res){
 
 						//console.log("id: " + latestUpdate["id"] + " minBikes: " + nearbyStations[thisId].minBikes + " latestBikes: " + latestBikes + " counts: " + stationCount + " === " + output.length);
 
-						if(output.length === stationCount)
+						if(output.length === stationCount - missingUpdates)
 							res.json(output);
 					});
-				});
-
-				updateCollection.find({id: station["id"], lastUpdated: {'$gt': timeSpan}}).sort({lastUpdate: 1}).each(function(err, update) {
-
+					} catch(err) {
+						console.log(err);
+					}
 				});
 
 			}

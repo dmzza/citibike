@@ -37,6 +37,10 @@ exports.list = function(req, res){
 		var stationCount = 0;
 		stationCursor.count(function(err, count) {
 			stationCount = count;
+
+			if(count === 0) {
+				res.send(404);
+			}
 		});
 
 		stationCursor.each(function(err, station) {

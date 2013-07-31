@@ -31,9 +31,9 @@ exports.list = function(req, res){
 					'$geometry': {
 						type: "Point",
 						coordinates: [ longitude, latitude ]
-					}, '$maxDistance': 500 }
+					}}
 				}
-			}
+			}, { 'limit': 5}
 		);
 		var stationCount = 0;
 		stationCursor.count(function(err, count) {
@@ -102,7 +102,7 @@ exports.list = function(req, res){
 
 						//console.log("id: " + latestUpdate["id"] + " minBikes: " + nearbyStations[thisId].minBikes + " latestBikes: " + latestBikes + " counts: " + stationCount + " === " + output.length);
 
-						if(resultsCount === stationCount - missingUpdates)
+						if(resultsCount === stationCount - missingUpdates || resultsCount === 5 - missingUpdates)
 							res.json(output);
 					});
 					} catch(err) {

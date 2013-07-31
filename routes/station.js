@@ -54,7 +54,7 @@ exports.list = function(req, res){
 				nearbyStations[station["id"]] = orderCount;
 				output[orderCount] = station;
 				orderCount++;
-				updateCollection.aggregate( [ { '$match': { id: station["id"], lastUpdate: {$gt: timeSpan} } }, { '$group': { '_id': '$id', minBikes: { '$min': "$availableBikes"} } } ], function(err, minResult) {
+				updateCollection.aggregate( [ { '$match': { id: station["id"], lastUpdate: {$gt: timeSpan} } }, { '$group': { '_id': '$id', minBikes: { '$min': "$availableBikes"}, minDocks: { '$min': "$availableDocks"} } } ], function(err, minResult) {
 					try {
 					if (err) throw err;
 					if(typeof minResult[0] == "undefined") {
@@ -63,8 +63,10 @@ exports.list = function(req, res){
 					}
 
 					minBikes = minResult[0].minBikes;
+					minDocks = minResult[0].minDocks;
 					outputId = nearbyStations[minResult[0]._id]
 					output[outputId].minBikes = minBikes;
+					output[outputId].minDocks = minDocks;
 
 					updateCollection.findOne({$query: {id: station["id"]}, $orderby: {'lastUpdate': -1}}, function(err, latestUpdate) {
 						if(err) throw err;
@@ -75,13 +77,14 @@ exports.list = function(req, res){
 						latestDocks = latestUpdate["availableDocks"]
 						totalDocks = latestBikes + latestDocks;
 						output[thisOutputId].availableBikes = latestBikes;
+						output[thisOutputId].availableDocks = latestDocks;
 
 						if(output[thisOutputId].minBikes < latestBikes || (latestBikes / totalDocks) > 0.15) {
 							output[thisOutputId].bikeStatus = "OK"
 						} else {
 							output[thisOutputId].bikeStatus = "NO"
 						}
-						if(latestDocks > 1) {
+						if(output[thisOutputId].minDocks < latestDocks || (latestDocks / totalDocks) > 0.15) {
 							output[thisOutputId].dockStatus = "OK"
 						} else {
 							output[thisOutputId].dockStatus = "NO"

@@ -19,7 +19,7 @@ exports.list = function(req, res){
 		, timeSpan = new Date().getTime() / 1000 - (4 * 60 * 60) /* hours * minutes * seconds */
 		, failsafe = setTimeout(function() {
 				res.json(output);
-			}, 3000);
+			}, 9000);
 
 	mongo.Db.connect(mongoUri, function (err, db) {
 		try {

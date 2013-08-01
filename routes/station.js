@@ -68,7 +68,8 @@ exports.list = function(req, res){
 					output[outputId].minBikes = minBikes;
 					output[outputId].minDocks = minDocks;
 
-					updateCollection.findOne({$query: {id: station["id"]}, $orderby: {'lastUpdate': -1}}, function(err, latestUpdate) {
+					var updateCursor = updateCollection.find({id: station["id"]}).sort({'lastUpdate': -1}).limit(1);
+					updateCursor.nextObject(function(err, latestUpdate) {
 						if(err) throw err;
 
 						thisOutputId = nearbyStations[latestUpdate["id"]]

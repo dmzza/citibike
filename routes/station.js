@@ -16,7 +16,10 @@ exports.list = function(req, res){
 		, missingUpdates = 0
 		, resultsCount = 0
 		, nearbyStations = new Array()
-		, timeSpan = new Date().getTime() / 1000 - (4 * 60 * 60); /* hours * minutes * seconds */
+		, timeSpan = new Date().getTime() / 1000 - (4 * 60 * 60) /* hours * minutes * seconds */
+		, failsafe = setTimeout(function() {
+				res.json(output);
+			}, 3000);
 
 	mongo.Db.connect(mongoUri, function (err, db) {
 		try {
@@ -102,8 +105,10 @@ exports.list = function(req, res){
 
 						//console.log("id: " + latestUpdate["id"] + " minBikes: " + nearbyStations[thisId].minBikes + " latestBikes: " + latestBikes + " counts: " + stationCount + " === " + output.length);
 
-						if(resultsCount === stationCount - missingUpdates || resultsCount === 5 - missingUpdates)
+						if(resultsCount === stationCount - missingUpdates || resultsCount === 5 - missingUpdates) {
+							clearTimeout(failsafe);
 							res.json(output);
+						}
 					});
 					} catch(err) {
 						console.log(err);

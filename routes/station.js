@@ -23,7 +23,8 @@ exports.list = function(req, res){
 		if (err) throw err;
 
 		var stationCollection = db.collection('stations')
-			, updateCollection = db.collection('updates');
+		  , updateCollection = db.collection('updates')
+		  , stationLimit = 15;
 
 		var stationCursor = stationCollection.find({
 			loc: {
@@ -33,7 +34,7 @@ exports.list = function(req, res){
 						coordinates: [ longitude, latitude ]
 					}}
 				}
-			}, { 'limit': 15}
+			}, { 'limit': stationLimit}
 		);
 		var stationCount = 0;
 		stationCursor.count(function(err, count) {
@@ -103,7 +104,7 @@ exports.list = function(req, res){
 
 						//console.log("id: " + latestUpdate["id"] + " minBikes: " + nearbyStations[thisId].minBikes + " latestBikes: " + latestBikes + " counts: " + stationCount + " === " + output.length);
 
-						if(resultsCount === stationCount - missingUpdates || resultsCount === 5 - missingUpdates)
+						if(resultsCount === stationCount - missingUpdates || resultsCount === stationLimit - missingUpdates)
 							res.json(output);
 					});
 					} catch(err) {

@@ -27,7 +27,7 @@ exports.index = function(req, res){
 			if (err) throw err;
 
 			var stationCollection = db.collection('stations')
-				, updateCollection = db.collection('updates');
+			  , updateCollection = db.collection('updates');
 
 			for(var i = 0; i<stations.length; i++) {
 				var station = stations[i];

@@ -33,7 +33,7 @@ exports.list = function(req, res){
 						coordinates: [ longitude, latitude ]
 					}}
 				}
-			}, { 'limit': 5}
+			}, { 'limit': 15}
 		);
 		var stationCount = 0;
 		stationCursor.count(function(err, count) {

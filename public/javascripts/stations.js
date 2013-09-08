@@ -6,6 +6,14 @@ $(function() {
 	  minDistance = 10000;
 	  minDifference = 10000;
 
+	  /* I now have privacy, so I can insert comments like this one:
+	  	I'm a Barbie girl, in the Barbie world
+		Life in plastic, it's fantastic!
+		You can brush my hair, undress me everywhere
+		Imagination, life is your creation
+		Come on Barbie, let's go party!
+		*/
+
 	  navigator.geolocation.getCurrentPosition(function(position) {
 
 	  	lat = position.coords.latitude;

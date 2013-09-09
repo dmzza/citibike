@@ -5,6 +5,7 @@
 
 var Citibike = require('citibike')
 	, citibike = new Citibike
+	, QMongoDB = require('q-mongodb')
 	, mongo = require('mongodb');
 
 var mongoUri = process.env.MONGOLAB_URI ||
@@ -20,40 +21,31 @@ exports.list = function(req, res){
 		, nearbyStations = new Array()
 		, timeSpan = new Date().getTime() / 1000 - (4 * 60 * 60); /* hours * minutes * seconds */
 
-	mongo.Db.connect(mongoUri, function (err, db) {
-		try {
-		if (err) throw err;
-
-		var stationCollection = db.collection('stations')
-		  , updateCollection = db.collection('updates')
-		  , stationLimit = 15;
-
+	QMongoDB.db(mongoUri).then(function (db) {
+		return [db.collection('stations'), db.collection('updates')];
+	})
+	.spread(function(stationCollection, updateCollection) {
+			
 		var stationCursor = stationCollection.find({
 			loc: {
-				'$nearSphere': {
-					'$geometry': {
+				$nearSphere: {
+					$geometry: {
 						type: "Point",
 						coordinates: [ longitude, latitude ]
-					}}
+					},
+					$maxDistance: 2000
 				}
-			}, { 'limit': stationLimit}
-		);
-		var stationCount = 0;
-		stationCursor.count(function(err, count) {
-			stationCount = count;
-
-			if(count === 0) {
-				res.send(404);
 			}
 		});
 
-		var orderCount = 0;
-		stationCursor.each(function(err, station) {
-			// If the item is null then the cursor is exhausted/empty and closed
-			if(station == null) {
-				//db.close();
-				// res.json(output);
-			} else {
+		return stationCursor.toArray();
+	})
+	.then(function(stations)) {
+		stations.map(function(station) {
+			
+		})
+	}
+			
 				nearbyStations[station["id"]] = orderCount;
 				output[orderCount] = station;
 				orderCount++;
@@ -140,25 +132,55 @@ exports.sync = function(req, res){
 	      for(var i = 0; i<stations.length; i++) {
 	        var station = stations[i];
 
-	        stationCollection.findOne({"id": station["id"]}, function(err, stationRecord) {
+	        station["lastUpdate"] = timestamp;
+	        station["loc"] = {
+	        	type: "Point",
+	        	coordinates: new Array()
+	        };
+	        station.loc.coordinates[0] = station.longitude;
+			station.loc.coordinates[1] = station.latitude;
+
+	        delete station.status;
+	        delete station.longitude;
+	        delete station.latitude;
+	        delete station.stationAddress;
+	        delete station.availableBikes;
+	        delete station.availableDocks;
+	        delete station.nearbyStations;
+
+	        stations[i] = station;
+
+	        stationCollection.findOne({"id": station.id}, function(err, stationRecord) {
 	          try {
-	          if (err) throw err;
-	          if(stationRecord === null) throw "missing station";
-
-	          // TODO: UPDATE OR CREATE EACH STATION HERE
-
+		          if (err) throw err;
+		          if(stationRecord === null) {
+		          	console.log(station.id + " not found, inserting");
+		          	// New Station Found
+		          	stationCollection.insert(station, {safe: true}, function(err,response) {
+		          		if (err) throw err;
+		          	});
+		          } else {
+		          	console.log(station.id + " found, updating");
+		          	// Station Exists, Update it
+		          	stationCollection.update({"id": station.id}, {$set: station});
+		          }
 	          } catch(err) {
-	          console.log(err);
-	          res.send(500);
+		          console.log(err);
+		          res.send(500);
 	          }
 	        });
+
+	        // TODO: Any stations with a lastUpdate != timestamp are now old, and should be deleted, with all of their updates.
+
 	      }
+	      res.send(stations);
+
+	      
 
 	      } catch(err) {
 	      console.log(err);
 	      res.send(500);
 	      }
 	    });
-    	res.send(stations);
 	});
 };
